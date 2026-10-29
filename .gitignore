@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+venv/
+.venv/
+.env
+media/
+staticfiles/
+*.sqlite3
+db.sqlite3
+.vscode/
+.github/
+postman/
+.postman/
+migrations/
