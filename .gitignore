@@ -1,0 +1,47 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Django databases, static, and media
+*.sqlite3
+*.db
+staticfiles/
+media/
+
+# Linters, formatters & test tools
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# IDEs & Editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+desktop.ini
+.DS_Store
+
+
+# Django specific
+migrations/
+
+# Local settings
+requirements.txt
