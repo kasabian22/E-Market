@@ -55,17 +55,33 @@ class Product(models.Model):
         unique_together = ('category', 'name')
         ordering = ['name']
         constraints = [
-            models.CheckConstraint(check=models.Q(price__gte=0), name='price_non_negative'),
+            models.CheckConstraint(condition=models.Q(price__gte=0), name='price_non_negative'),
         ]
 
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = generate_unique_slug(Product, title=self.name, exclude_pk=self.pk)
-
+    def clean(self):
+        super().clean()
+    
+        if not self.slug and self.name:
+            self.slug = generate_unique_slug(
+                Category, title=self.name, exclude_pk=self.pk
+            )
+    
         if not self.slug or not self.slug.strip():
-            raise ValidationError("Integrity guard: Product slug cannot be empty.")
-
+            raise ValidationError(
+                {'slug': 'Integrity guard: Category slug cannot be empty.'}
+            )
+    
+        try:
+            get_slug_base(self.name, self.slug)
+        except ValidationError as error:
+            message = error.messages[0] if error.messages else CUSTOM_SLUG_ERROR
+            raise ValidationError(
+                {'name' if message == TITLE_SLUG_ERROR else 'slug': message}
+            )
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
         super().save(*args, **kwargs)
