@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, blank=True)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -41,7 +41,7 @@ class Category(models.Model):
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, blank=True)
     description = models.TextField(blank=True, null=True)
     brand = models.CharField(max_length=100, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
@@ -66,12 +66,12 @@ class Product(models.Model):
     
         if not self.slug and self.name:
             self.slug = generate_unique_slug(
-                Category, title=self.name, exclude_pk=self.pk
+                Product, title=self.name, exclude_pk=self.pk
             )
     
         if not self.slug or not self.slug.strip():
             raise ValidationError(
-                {'slug': 'Integrity guard: Category slug cannot be empty.'}
+                {'slug': 'Integrity guard: Product slug cannot be empty.'}
             )
     
         try:
