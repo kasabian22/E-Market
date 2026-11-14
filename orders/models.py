@@ -1,13 +1,12 @@
 import uuid
-
 from django.db import models
-
+from django.contrib.auth.models import User
 from catalog.models import Product
 
 
 class Order(models.Model):
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
-    order_number = models.UUIDField(auto_created=True, default=uuid.uuid4, editable=False, unique=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    order_number = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     status = models.CharField(max_length=20, choices=[
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
@@ -33,9 +32,16 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='items')
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price of the product at the time of order")
 
+
+    @property
+    def item_subtotal(self):
+        return self.price * self.quantity
+    
+    
     def __str__(self):
         return f"{self.quantity} of {self.product.name} in Order {self.order.order_number}"
+    
