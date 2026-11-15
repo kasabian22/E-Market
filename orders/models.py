@@ -35,6 +35,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='items')
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price of the product at the time of order")
+    product_name = models.CharField(max_length=255)
 
 
     @property
@@ -44,4 +45,12 @@ class OrderItem(models.Model):
     
     def __str__(self):
         return f"{self.quantity} of {self.product.name} in Order {self.order.order_number}"
+
+    # save a snapshot from the price and product name so that if you changed them later they don't change in the order
+    def save(self, *args, **kwargs):
+        if not self.product_name and self.product:
+            self.product_name = self.product.name
+        if not self.price and self.product:
+            self.price = self.product.price
+        super().save(*args, **kwargs)
     

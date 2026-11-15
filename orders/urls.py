@@ -4,5 +4,5 @@ from . import views
 app_name = 'orders'
 
 urlpatterns = [
-    path('', views.order_list, name='order_list'),
+    path('', views.UserOrderListAPIView.as_view(), name='orders'),
 ]
