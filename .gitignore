@@ -45,3 +45,7 @@ migrations/
 
 # Local settings
 requirements.txt
+PLAN.md
+seed_products.py
+seed_orders.py
+api.http

@@ -5,6 +5,6 @@ app_name = 'catalog'
 
 urlpatterns = [
     path('', views.ProductListCreateAPIView.as_view(), name='ProductListAPIView'),
-    path('product/<slug:slug>/', views.ProductDetailAPIView.as_view(), name='view-product'),
+    path('products/<slug:slug>/', views.ProductDetailAPIView.as_view(), name='view-product'),
     # path('product/create/', views.ProductCreateAPIView.as_view(), name='create-product'),
 ]
