@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
 
 from .models import Category, Product
 from .serializers import CategorySerializer, ProductSerializer
@@ -29,6 +30,12 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
     ]
     search_fields = ["category__name" "name", "description", "brand"]
     ordering_fields = ["id", "name", "description", "stock_quantity", "price"]
+    pagination_class = PageNumberPagination
+    page_size = 2
+
+    # you can make the user choose the number of pruduct in each page and limit that number
+    # page_size_query_param = 'size'
+    # max_page_size = 4
 
     def get_permissions(self):
         self.permission_classes = [AllowAny]

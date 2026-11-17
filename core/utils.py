@@ -127,19 +127,3 @@ def generate_unique_slug(
 
 # =================================================================================================================== #
 
-
-def paginate_queryset(request, queryset, per_page=9):
-    """
-    A helper function for paginating any QuerySet
-    """
-    # Initialize Paginator: Show 9 courses per page (3 rows x 3 columns)
-    paginator = Paginator(queryset, per_page)
-
-    # Get the requested page number from the URL query string (e.g., ?page=2)
-    page_number = request.GET.get("page", 1)
-
-    # get_page() safely handles invalid strings (like ?page=abc) or out-of-range numbers
-    return paginator.get_page(page_number)
-
-
-# =================================================================================================================== #
