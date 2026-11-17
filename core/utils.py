@@ -1,15 +1,18 @@
 import re
 import uuid
-from unidecode import unidecode
-from django.db import models
-from django.utils.text import slugify
+
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
+from django.db import models
+from django.utils.text import slugify
+from unidecode import unidecode
 
 MIN_SLUG_CONTENT_LENGTH = 2
 MAX_SLUG_BASE_LENGTH = 240
 TITLE_SLUG_ERROR = f"The course title must contain at least {MIN_SLUG_CONTENT_LENGTH} letters or numbers."
-CUSTOM_SLUG_ERROR = f"The slug must contain at least {MIN_SLUG_CONTENT_LENGTH} letters or numbers."
+CUSTOM_SLUG_ERROR = (
+    f"The slug must contain at least {MIN_SLUG_CONTENT_LENGTH} letters or numbers."
+)
 
 
 def contains_minimum_slug_content(value):
@@ -36,6 +39,7 @@ def get_slug_base(title="", custom_slug=""):
     if title and not contains_minimum_slug_content(base_slug):
         raise ValidationError(TITLE_SLUG_ERROR)
     return base_slug
+
 
 def extract_smart_base_slug(title):
     """
@@ -69,12 +73,22 @@ def extract_smart_base_slug(title):
     return base_slug
 
 
-def generate_unique_slug(instance_or_model, title="", custom_slug="", exclude_pk=None, validated_base_slug=None):
+def generate_unique_slug(
+    instance_or_model,
+    title="",
+    custom_slug="",
+    exclude_pk=None,
+    validated_base_slug=None,
+):
     """
     Generate a guaranteed non-empty, unique slug for a Course.
     Prioritizes custom_slug if provided; otherwise derives it from title.
     """
-    base_slug = validated_base_slug if validated_base_slug is not None else get_slug_base(title, custom_slug)
+    base_slug = (
+        validated_base_slug
+        if validated_base_slug is not None
+        else get_slug_base(title, custom_slug)
+    )
 
     # Ultimate fallback if input was only symbols like "???" generate random slug
     if not base_slug:
@@ -91,27 +105,28 @@ def generate_unique_slug(instance_or_model, title="", custom_slug="", exclude_pk
     if exclude_pk:
         qs = qs.exclude(pk=exclude_pk)
 
-
     # Leave room for a numeric uniqueness suffix within the model's 250 character limit.
-    base_slug = base_slug[:MAX_SLUG_BASE_LENGTH].strip('-')
-    
+    base_slug = base_slug[:MAX_SLUG_BASE_LENGTH].strip("-")
 
     # Fetch all matching slugs in one single SQL query
     existing_slugs = set(
         qs.filter(
-            models.Q(slug=base_slug) | models.Q(slug__regex=rf'^{re.escape(base_slug)}-\d+$')
-        ).values_list('slug', flat=True)
+            models.Q(slug=base_slug)
+            | models.Q(slug__regex=rf"^{re.escape(base_slug)}-\d+$")
+        ).values_list("slug", flat=True)
     )
     if base_slug not in existing_slugs:
         return base_slug
-    
+
     counter = 1
     while f"{base_slug}-{counter}" in existing_slugs:
         counter += 1
-    
+
     return f"{base_slug}-{counter}"
 
+
 # =================================================================================================================== #
+
 
 def paginate_queryset(request, queryset, per_page=9):
     """
@@ -121,13 +136,10 @@ def paginate_queryset(request, queryset, per_page=9):
     paginator = Paginator(queryset, per_page)
 
     # Get the requested page number from the URL query string (e.g., ?page=2)
-    page_number = request.GET.get('page', 1)
+    page_number = request.GET.get("page", 1)
 
     # get_page() safely handles invalid strings (like ?page=abc) or out-of-range numbers
     return paginator.get_page(page_number)
 
 
-
 # =================================================================================================================== #
-
-
