@@ -28,11 +28,10 @@ class ProductFilter(filters.FilterSet):
         fields = {
             'name': ['iexact', 'icontains'], 
             'price': ['exact', 'lt', 'gt', 'range'], 
-            # 'category', 
-            # 'in_stock'
+            # 'category': , 
             }
-        def filter_in_stock(self, queryset, name, value):
-            if value:  # if value is True (?in_stock=true)
-                return queryset.filter(stock_quantity__gt=0)
-            return queryset
+    def filter_in_stock(self, queryset, name, value):
+        if value:  # if value is True (?in_stock=true)
+            return queryset.filter(stock_quantity__gt=0)
+        return queryset
 

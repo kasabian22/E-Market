@@ -8,7 +8,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from .models import Category, Product
 from .serializers import CategorySerializer, ProductSerializer
-from .filters import ProductFilter, InStockFilterBackend
+from .filters import ProductFilter
 
 
 @api_view(["GET"])
@@ -26,7 +26,6 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
         DjangoFilterBackend, 
         filters.SearchFilter, 
         filters.OrderingFilter,
-        InStockFilterBackend,
     ]
     search_fields = ["category__name" "name", "description", "brand"]
     ordering_fields = ["id", "name", "description", "stock_quantity", "price"]

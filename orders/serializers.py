@@ -15,6 +15,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     # items must match order related name in the OrderItem model
+    
     items = OrderItemSerializer(
         many=True,
         read_only=True,
