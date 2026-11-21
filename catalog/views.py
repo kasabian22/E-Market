@@ -1,4 +1,6 @@
-from rest_framework import generics
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from rest_framework import generics, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
@@ -11,14 +13,13 @@ from .serializers import CategorySerializer, ProductSerializer
 from .filters import ProductFilter
 
 
-@api_view(["GET"])
-def category_list(request):
-    categories = Category.objects.all()
-    serializer = CategorySerializer(categories, many=True)
-    return Response(serializer.data)
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    
 
-
-class ProductListCreateAPIView(generics.ListCreateAPIView):
+# view and create and update abd delete products 
+class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.filter(is_active=True)
     serializer_class = ProductSerializer
     filterset_class = ProductFilter
@@ -27,37 +28,28 @@ class ProductListCreateAPIView(generics.ListCreateAPIView):
         filters.SearchFilter, 
         filters.OrderingFilter,
     ]
-    search_fields = ["category__name" "name", "description", "brand"]
+    search_fields = ["category__name", "name", "description", "brand"]
     ordering_fields = ["id", "name", "description", "stock_quantity", "price"]
     pagination_class = PageNumberPagination
     page_size = 2
+    lookup_field = "slug"
+    
+    # it's slug by default but if you changed the kwarg in the url path change it here too, because the default is the type of the lookup
+    lookup_url_kwarg = "slug"
 
-    # you can make the user choose the number of pruduct in each page and limit that number
+    # you can make the user choose the number of pruducts in each page and limit that number
     # page_size_query_param = 'size'
     # max_page_size = 4
 
     def get_permissions(self):
-        self.permission_classes = [AllowAny]
-        if self.request.method == "POST":
-            self.permission_classes = [IsAdminUser]
-        return super().get_permissions()
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminUser()]
+        return [AllowAny()]
+
+    @method_decorator(cache_page(60 * 60 * 2, key_prefix="products_list"))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    
 
 
-# class ProductCreateAPIView(generics.CreateAPIView):
-#     model = Product
-#     serializer_class = ProductSerializer
-
-
-class ProductDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Product.objects.filter(is_active=True)
-    serializer_class = ProductSerializer
-    lookup_field = "slug"
-
-    # it's slug by default but if you changed the kwarg in the url path change it here too, because the default is the type of the lookup
-    lookup_url_kwarg = "slug"
-
-    def get_permissions(self):
-        self.permission_classes = [AllowAny]
-        if self.request.method in ["PUT", "PATCH", "DELETE"]:
-            self.permission_classes = [IsAdminUser]
-        return super().get_permissions()

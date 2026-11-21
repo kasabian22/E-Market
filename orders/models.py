@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import F
 
 from catalog.models import Product
 
@@ -31,8 +32,13 @@ class Order(models.Model):
     shipping_cost = models.DecimalField(
         max_digits=10, decimal_places=2, help_text="Shipping cost"
     )
-    total_cost = models.DecimalField(
-        max_digits=10, decimal_places=2, help_text="Total cost of the order"
+    tota_lcost = models.GeneratedField(
+        expression=F('subtotal') + F('shipping_cost'),
+        output_field=models.DecimalField(
+            max_digits=10,
+            decimal_places=2
+        ),
+        db_persist=True
     )
     customer_name = models.CharField(max_length=255, help_text="Name of the customer")
     phone_number = models.CharField(max_length=20, help_text="Customer's phone number")
